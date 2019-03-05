@@ -1,5 +1,9 @@
 import tensorflow as tf
 from hdf5storage import loadmat
+from os.path import join
+
+ds_path = 'D:/datasets/processed/voc2012'
+nc = 20
 
 data_dir = 'data'
 embeddings_model_dir = 'models/embeddings_model'

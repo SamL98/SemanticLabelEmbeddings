@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 from os.path import join
 import numpy as np
+import sys
 from util import *
 
 def convolve_context_window(gt, wsize):
@@ -13,11 +14,12 @@ def convolve_context_window(gt, wsize):
 	
 	:returns An array of tuples of the form (given_label, context_label)
 	'''
-	assert wsize % 2 == 1
-	assert wsize < gt.shape[0] and wsize < gt.shape[1]
+	context_pairs = []
+	
+	if wsize % 2 == 0 or not (wsize < gt.shape[0] and wsize < gt.shape[1]):
+		return context_pairs
 
 	wrad = int(np.floor(wsize/2))
-	context_pairs = []
 
 	for i in range(wrad, gt.shape[0] - wrad):
 		for j in range(wrad, gt.shape[1] - wrad):
@@ -31,7 +33,7 @@ def convolve_context_window(gt, wsize):
 			uniq_diff_labs = np.unique(diff_labs)
 
 			for lab in uniq_diff_labs:
-				context_pairs.append((given_lab, lab]))
+				context_pairs.append((given_lab, lab))
 
 	return context_pairs
 
@@ -43,7 +45,13 @@ def get_context_for_imset(imset, writer, wsize=151):
 	:param writer: The TFRecordWriter to write the serialized context pairs to.
 	:param wsize: The context window size.
 	'''
+	sys.stdout.write('%s\n' % imset)
+	sys.stdout.flush()
+	
 	for idx in range(1, num_img_for(imset)+1):
+		sys.stdout.write('%d\n' % idx)
+		sys.stdout.flush()
+	
 		gt = load_gt(imset, idx, reshape=False)
 		pairs = convolve_context_window(gt, wsize)
 
@@ -52,7 +60,7 @@ def get_context_for_imset(imset, writer, wsize=151):
 				given_tf_key: int64_feature(given_lab),
 				context_tf_key: bytes_feature(context_labs.tostring())
 			}
-			tf_ex = tf.train.Example(features=tf_features)
+			tf_ex = tf.train.Example(features=tf.train.Features(feature=tf_features))
 			writer.write(tf_ex.SerializeToString())
 
 if __name__ == '__main__':

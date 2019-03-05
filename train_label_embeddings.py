@@ -6,9 +6,9 @@ from util import *
 
 arg_parser = ArgumentParser(description='Train the label embeddings.')
 arg_parser.add_argument('--data_dir', '-ddir', dest='data_dir', type=str, default=data_dir, help='The directory that contains the tfrecords files.')
-arg_parser.add_argument('--batch_size', 'bsize', dest='batch_size', type=int, default=32, help='The batch size to use when training the embeddings.')
-arg_parser.add_argument('--num_steps', 'nstep', dest='num_steps', type=int, default=10000, help='The number of steps to train the embeddings for.')
-arg_parser.add_argument('--embedding_size', '-esize', dest='embedding_size', type=int, default=50, help='The dimensionality of the embeddings to train.')
+arg_parser.add_argument('--batch_size', '-bsize', dest='batch_size', type=int, default=8, help='The batch size to use when training the embeddings.')
+arg_parser.add_argument('--num_steps', '-nstep', dest='num_steps', type=int, default=10000, help='The number of steps to train the embeddings for.')
+arg_parser.add_argument('--embedding_size', '-esize', dest='embedding_size', type=int, default=100, help='The dimensionality of the embeddings to train.')
 args = arg_parser.parse_args()
 
 
@@ -55,13 +55,13 @@ def parse_example(tf_example):
         A tuple of the input features and corresponding label
     '''
     feats_dict = {
-        'given_label': tf.FixedLenFeature((), tf.uint8, default_value=0),
-        'context_label': tf.FixedLenFeature((), tf.uint8, default_value=0)
+        'given_label': tf.FixedLenFeature((1), tf.int64, default_value=0),
+        'context_label': tf.FixedLenFeature((1), tf.int64, default_value=0)
     }
     features = tf.parse_single_example(tf_example, feats_dict)
     return { given_tf_key, features[given_tf_key]}, features[context_tf_key]
 
-def dataset_input_fn(fnames, batch_size)
+def dataset_input_fn(fnames, batch_size):
     '''
     Input function for the estimator.
 
@@ -81,10 +81,10 @@ def dataset_input_fn(fnames, batch_size)
 
 
 if __name__ == '__main__':
-    fnames = [join(args.data_dir, f) for f in os.listdir(arg.data_dir)]
+    fnames = [join(args.data_dir, f) for f in os.listdir(args.data_dir)]
     input_fn = partial(dataset_input_fn, fnames, args.batch_size)
 
-    features_columns = [tf.features_column.numeric_column(given_tf_key, dtype=tf.dtypes.uint8)]
+    feature_columns = [tf.feature_column.numeric_column(given_tf_key, dtype=tf.int64)]
     params = {
         'features_columns': feature_columns,
         'n_classes': nc ,
