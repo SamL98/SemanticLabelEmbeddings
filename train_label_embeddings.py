@@ -16,13 +16,15 @@ def model_fn(features, labels, params):
     '''
     The model function for the embeddings estimator
 
-    :param features: A dictionary mapping feature names to tensors.
+    Params:
+        features: A dictionary mapping feature names to tensors.
                     Should be just { 'given_label': label_tensor } where label_tensor has shape (1,) and dtype tf.uint8
-    :param labels: A tensor of the context labels. Should just be a tf.uint8
-    :param params: A dictionary of other parameters.
+        labels: A tensor of the context labels. Should just be a tf.uint8
+        params: A dictionary of other parameters.
                     Only thing of note should be feature_columns which should be set to [input_key]
 
-    :returns An EstimatorSpec object for the embedding estimator
+    Returns:
+        An EstimatorSpec object for the embedding estimator
     '''
 
     embedding_size = params['embedding_size']
@@ -46,9 +48,11 @@ def parse_example(tf_example):
     '''
     Parse the features and label for a given tensorflow example
 
-    :param tf_example: The serialized tensorflow protobuf example
+    Params:
+        tf_example: The serialized tensorflow protobuf example
 
-    :returns A tuple of the input features and corresponding label
+    Returns:
+        A tuple of the input features and corresponding label
     '''
     feats_dict = {
         'given_label': tf.FixedLenFeature((), tf.uint8, default_value=0),
@@ -61,10 +65,12 @@ def dataset_input_fn(fnames, batch_size)
     '''
     Input function for the estimator.
 
-    :param fnames: A list of the tfrecords filenames.
-    :param batch_size: The batch size to use while training.
+    Params:
+        fnames: A list of the tfrecords filenames.
+        batch_size: The batch size to use while training.
 
-    :returns A tensorflow Dataset object to use as the input function for the embeddings estimator.
+    Returns:
+        A tensorflow Dataset object to use as the input function for the embeddings estimator.
     '''
     dataset = tf.data.TFRecordDataset(fnames)
     dataset = dataset.map(parse_example)
